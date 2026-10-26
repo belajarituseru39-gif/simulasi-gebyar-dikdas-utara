@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paket Simulasi Gebyar Dikdas (15 Soal)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .hidden { display: none !important; }
+        input[type="radio"], input[type="checkbox"] { accent-color: #b91c1c; }
+        /* Custom scrollbar for question grid */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .animate-in { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800">
+
+    <!-- SCREEN: LOGIN -->
+    <div id="screen-login" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200">
+            <div class="bg-red-700 p-6 text-center text-white">
+                <i data-lucide="book-open" class="w-12 h-12 mx-auto mb-2 text-white"></i>
+                <h1 class="text-2xl font-bold">Gebyar Dikdas Balikpapan Utara 2026</h1>
+                <p class="text-red-100 text-sm mt-1">Jenjang Sekolah Dasar</p>
+            </div>
+            <form id="login-form" class="p-6 space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="user" class="h-5 w-5 text-slate-400"></i>
+                        </div>
+                        <input type="text" id="input-name" required class="pl-10 w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition" placeholder="Masukkan nama Anda">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Asal Sekolah</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="school" class="h-5 w-5 text-slate-400"></i>
+                        </div>
+                        <input type="text" id="input-school" required class="pl-10 w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition" placeholder="Contoh: SDN 001 Balikpapan Utara">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Pilih Paket Ujian</label>
+                    <select id="input-package" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none bg-white font-medium">
+                        <!-- Options injected via JS -->
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+                    Masuk Lomba
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCREEN: DASHBOARD -->
+    <div id="screen-dashboard" class="hidden min-h-screen p-4 md:p-8">
+        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-red-700 p-6 text-white flex justify-between items-center">
+                <h1 class="text-xl font-bold">Konfirmasi Data Peserta</h1>
+                <button onclick="switchScreen('login')" class="flex items-center text-red-100 hover:text-white transition">
+                    <i data-lucide="log-out" class="w-4 h-4 mr-1"></i> Kembali
+                </button>
+            </div>
+            <div class="p-6 md:p-10">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-sm text-slate-500">Nama Peserta</p>
+                            <p id="dash-name" class="text-lg font-semibold text-slate-800"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">Asal Sekolah</p>
+                            <p id="dash-school" class="text-lg font-semibold text-slate-800"></p>
+                        </div>
+                        <div class="pt-4 border-t border-slate-200">
+                            <p class="text-sm text-slate-500">Mata Ujian</p>
+                            <p id="dash-package" class="text-lg font-bold text-red-800"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">Jumlah Soal</p>
+                            <p id="dash-count" class="text-lg font-semibold text-slate-800"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">Alokasi Waktu</p>
+                            <p id="dash-time" class="text-lg font-semibold text-slate-800"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-red-50 p-6 rounded-xl border border-red-100">
+                        <h3 class="font-bold text-red-900 mb-3 flex items-center">
+                            <i data-lucide="alert-circle" class="w-5 h-5 mr-2"></i> Petunjuk Pengerjaan
+                        </h3>
+                        <ul class="list-disc pl-5 space-y-2 text-sm text-slate-700">
+                            <li>Berdoalah sebelum memulai ujian.</li>
+                            <li>Ujian ini memuat soal Pilihan Ganda & Pilihan Ganda Kompleks (pilih semua pernyataan yang benar).</li>
+                            <li>Anda dapat melompat ke soal lain menggunakan panel navigasi nomor di kanan.</li>
+                            <li>Waktu terus berjalan setelah Anda menekan tombol mulai.</li>
+                            <li class="font-semibold text-red-600">Dilarang membuka tab baru, berpindah aplikasi, atau keluar dari halaman ujian. Perpindahan yang terdeteksi akan dicatat dan dikirim ke panitia.</li>
+                        </ul>
+                        <button onclick="startTest()" class="mt-6 w-full bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
+                            MULAI UJIAN
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN: TEST -->
+    <div id="screen-test" class="hidden min-h-screen flex flex-col font-sans">
+        <header class="bg-red-800 text-white shadow-md z-10 sticky top-0">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="book-open" class="w-6 h-6 hidden sm:block text-white"></i>
+                    <div>
+                        <h1 id="test-header-title" class="font-bold text-lg leading-tight">Gebyar Dikdas Balikpapan Utara 2026</h1>
+                        <p id="test-header-subtitle" class="text-xs text-red-200"></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div id="violation-badge" class="hidden bg-red-600 px-3 py-2 rounded-lg items-center border border-red-400 shadow-inner animate-pulse">
+                        <i data-lucide="shield-alert" class="w-4 h-4 mr-1.5 text-white"></i>
+                        <span class="text-xs sm:text-sm font-bold text-white">Pelanggaran: <span id="header-violation-count">0</span>x</span>
+                    </div>
+                    <div class="bg-red-900 px-4 py-2 rounded-lg flex items-center border border-red-700 shadow-inner">
+                        <i data-lucide="clock" id="timer-icon" class="w-5 h-5 mr-2 text-red-200"></i>
+                        <span id="timer-text" class="font-mono text-xl font-bold tracking-wider text-white">00:00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 container mx-auto p-4 flex flex-col lg:flex-row gap-6">
+            <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center">
+                    <span id="q-number" class="font-bold text-slate-700">Soal Nomor 1</span>
+                    <span id="q-badge" class="hidden text-xs font-bold text-white bg-orange-500 px-2 py-1 rounded">Jawaban Kompleks</span>
+                </div>
+                
+                <div class="p-6 md:p-8 flex-1 overflow-y-auto">
+                    <div id="q-text" class="text-lg text-slate-800 leading-relaxed whitespace-pre-wrap mb-8 text-justify">
+                        <!-- Question text here -->
+                    </div>
+                    
+                    <div id="q-options" class="space-y-3">
+                        <!-- Options generated here via JS -->
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center">
+                    <button id="btn-prev" onclick="prevQuestion()" class="flex items-center px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                        <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i> SEBELUMNYA
+                    </button>
+                    
+                    <button id="btn-finish" onclick="showSubmitModal()" class="hidden items-center px-6 py-2 bg-red-700 border border-red-800 rounded-lg text-white font-bold hover:bg-red-800 shadow-md transition">
+                        <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> SELESAI
+                    </button>
+                    
+                    <button id="btn-next" onclick="nextQuestion()" class="flex items-center px-4 py-2 bg-red-700 border border-red-800 rounded-lg text-white hover:bg-red-800 transition">
+                        SELANJUTNYA <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="w-full lg:w-80 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col">
+                <div class="bg-slate-50 px-6 py-3 border-b border-slate-200">
+                    <h3 class="font-bold text-slate-700">Daftar Soal</h3>
+                </div>
+                <div id="q-grid" class="p-4 grid grid-cols-5 gap-2 overflow-y-auto max-h-[50vh] lg:max-h-none">
+                    <!-- Grid buttons generated via JS -->
+                </div>
+                <div class="p-4 border-t border-slate-200 mt-auto bg-slate-50 rounded-b-xl">
+                    <div class="flex items-center mb-2 text-sm text-slate-600">
+                        <div class="w-4 h-4 bg-red-500 border border-red-600 rounded mr-2"></div>
+                        <span id="stat-answered">Sudah Dijawab: 0</span>
+                    </div>
+                    <div class="flex items-center text-sm text-slate-600">
+                        <div class="w-4 h-4 bg-white border border-slate-300 rounded mr-2"></div>
+                        <span id="stat-unanswered">Belum Dijawab: 0</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- MODAL KONFIRMASI -->
+        <div id="modal-submit" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in">
+                <div class="flex items-center justify-center w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full mx-auto mb-4">
+                    <i data-lucide="alert-circle" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-xl font-bold text-center text-slate-800 mb-2">Konfirmasi Selesai</h2>
+                <p class="text-center text-slate-600 mb-6">
+                    Apakah Anda yakin ingin menyelesaikan ujian ini? <br/>
+                    Masih ada <span id="modal-unanswered" class="font-bold text-red-600">0</span> soal kosong.
+                </p>
+                <div class="flex space-x-3">
+                    <button onclick="hideSubmitModal()" class="flex-1 py-3 bg-slate-100 text-slate-700 font-medium rounded-lg hover:bg-slate-200 transition">
+                        Kembali Cek Soal
+                    </button>
+                    <button onclick="submitTest()" class="flex-1 py-3 bg-red-700 text-white font-bold rounded-lg hover:bg-red-800 shadow-md transition">
+                        Kumpulkan Ujian
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL PERINGATAN PELANGGARAN (ANTI-CHEAT) -->
+        <div id="modal-violation" class="hidden fixed inset-0 bg-red-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in border-2 border-red-500 text-center">
+                <div class="flex items-center justify-center w-20 h-20 bg-red-100 text-red-600 rounded-full mx-auto mb-4 ring-8 ring-red-50">
+                    <i data-lucide="shield-alert" class="w-10 h-10"></i>
+                </div>
+                <span class="inline-block px-3 py-1 bg-red-100 text-red-700 text-xs font-extrabold uppercase tracking-wider rounded-full mb-2">
+                    Deteksi Keamanan Ujian
+                </span>
+                <h2 class="text-2xl font-black text-red-600 mb-2">PERINGATAN PELANGGARAN!</h2>
+                <p class="text-slate-700 text-sm leading-relaxed mb-4">
+                    Anda terdeteksi <strong>membuka tab baru, berpindah jendela, atau meninggalkan halaman ujian</strong>. Aktivitas ini dilarang keras selama ujian berlangsung.
+                </p>
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-5 text-left space-y-1.5">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-600 font-medium">Total Pelanggaran Anda:</span>
+                        <span class="font-black text-red-600 text-base"><span id="modal-violation-count">1</span> Kali</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-slate-500">
+                        <span>Waktu Terdeteksi:</span>
+                        <span id="modal-violation-time" class="font-mono font-semibold text-slate-700">-</span>
+                    </div>
+                    <div class="pt-2 border-t border-red-200 flex items-center text-xs text-red-700 font-semibold">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 mr-1.5 shrink-0"></i>
+                        <span id="violation-save-status">Catatan pelanggaran sedang dikirim ke panitia...</span>
+                    </div>
+                </div>
+                <button onclick="acknowledgeViolation()" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition duration-200">
+                    Saya Mengerti & Lanjutkan Ujian
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN: SUBMITTING -->
+    <div id="screen-submitting" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200 p-8 text-center">
+            <div class="w-12 h-12 border-4 border-red-200 border-t-red-700 rounded-full animate-spin mx-auto mb-4"></div>
+            <h2 class="text-xl font-bold text-slate-800">Menyimpan Hasil...</h2>
+            <p class="text-slate-500 mt-2">Mohon tunggu sebentar, nilai sedang dikirim ke server.</p>
+        </div>
+    </div>
+
+    <!-- SCREEN: RESULT -->
+    <div id="screen-result" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden text-center relative border border-slate-200">
+            <div class="h-32 bg-gradient-to-r from-red-700 to-rose-800 absolute top-0 left-0 w-full"></div>
+            <div class="relative pt-16 px-6 pb-8">
+                <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg mx-auto mb-4 border-4 border-slate-50">
+                    <i data-lucide="check-circle" class="w-12 h-12 text-green-500"></i>
+                </div>
+                
+                <h1 class="text-3xl font-black text-slate-800 mb-1">Ujian Selesai!</h1>
+                <p id="save-status" role="status" aria-live="polite" class="mb-3 text-sm"></p>
+                <button id="retry-save" onclick="retrySaveResult()" class="hidden mb-4 px-4 py-2 bg-orange-600 text-white rounded-lg disabled:opacity-50">Kirim Ulang</button>
+                <p class="text-slate-500 mb-8">Terima kasih telah mengikuti Gebyar Dikdas Balikpapan Utara 2026.</p>
+
+                <div class="bg-slate-50 rounded-xl p-5 border border-slate-100 mb-8 text-left">
+                    <table class="w-full text-sm">
+                        <tbody>
+                            <tr class="border-b border-slate-200">
+                                <td class="py-2 text-slate-500">Nama Lengkap</td>
+                                <td id="res-name" class="py-2 font-semibold text-slate-800 text-right"></td>
+                            </tr>
+                            <tr class="border-b border-slate-200">
+                                <td class="py-2 text-slate-500">Asal Sekolah</td>
+                                <td id="res-school" class="py-2 font-semibold text-slate-800 text-right"></td>
+                            </tr>
+                            <tr class="border-b border-slate-200">
+                                <td class="py-2 text-slate-500">Mata Ujian</td>
+                                <td id="res-package" class="py-2 font-semibold text-red-800 text-right"></td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 text-slate-500">Catatan Pelanggaran</td>
+                                <td id="res-violation" class="py-2 font-bold text-green-600 text-right">0 Kali (Bersih)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex justify-center items-center gap-6 mb-8">
+                    <div class="text-center">
+                        <p class="text-sm text-slate-500 uppercase tracking-wider mb-1">Benar</p>
+                        <p id="res-correct" class="text-3xl font-bold text-green-500">0</p>
+                    </div>
+                    <div class="w-px h-12 bg-slate-200"></div>
+                    <div class="text-center">
+                        <p class="text-sm text-slate-500 uppercase tracking-wider mb-1">Salah/Kosong</p>
+                        <p id="res-wrong" class="text-3xl font-bold text-red-500">0</p>
+                    </div>
+                    <div class="w-px h-12 bg-slate-200"></div>
+                    <div class="text-center">
+                        <p class="text-sm text-slate-500 uppercase tracking-wider mb-1">Nilai</p>
+                        <p id="res-score" class="text-4xl font-black text-red-700">0</p>
+                    </div>
+                </div>
+
+                <button onclick="resetApp()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg transition duration-200">
+                    Kembali ke Halaman Awal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATABASE SOAL GABUNGAN (50 SOAL: IPAS, MATEMATIKA, PANCASILA, BAHASA INDONESIA, PKLH) ---
+        const soalPackages = {
+  "simulasi_15": {
+    "title": "Paket Simulasi Gebyar Dikdas (15 Soal)",
+    "duration": 120,
+    "questions": [
+      {
+        "type": "single",
+        "text": "SD Tunas Bangsa di Balikpapan memiliki kantin yang sangat ramai. Setiap hari, banyak air sisa mencuci piring yang mengandung lemak dan sabun dihasilkan. Untuk menjaga lingkungan, sekolah membangun sistem bak-bak bawah tanah. Air sisa dari kantin dialirkan ke bak pertama untuk menyaring sampah besar, kemudian ke bak kedua untuk memisahkan lemak, dan terakhir ke bak penjernihan sebelum dialirkan ke selokan kota. Sistem ini dirancang agar air yang keluar tidak mencemari lingkungan dan tidak menimbulkan bau yang mengganggu warga sekolah.\n\nBerdasarkan teks tersebut, fungsi utama dari pembangunan Instalasi Pengolahan Air Limbah (IPAL) di sekolah adalah ....",
+        "options": [
+          "Menampung air hujan agar tidak banjir",
+          "Mengolah air limbah agar aman saat dibuang",
+          "Menghemat penggunaan air bersih di kantin",
+          "Menyimpan cadangan air untuk menyiram tanaman"
+        ],
+        "answer": 1,
+        "subject": "PKLH",
+        "sourceNumber": 1
+      },
+      {
+        "type": "single",
+        "text": "Setelah hujan deras mengguyur Kota Balikpapan, lapangan SD Hijau Lestari seringkali mengalami genangan air yang cukup lama surutnya. Hal ini menyebabkan siswa tidak bisa bermain saat jam istirahat. Tanah di lapangan tersebut terlihat padat karena sering terinjak-injak. Kepala sekolah berencana mengajak siswa melakukan aksi lingkungan untuk mempercepat resapan air ke dalam tanah sekaligus memanfaatkan sampah organik daun kering yang banyak berserakan di sekitar sekolah.\n\nLangkah yang paling tepat dilakukan oleh siswa untuk mengatasi masalah genangan air tersebut berdasarkan teks adalah ....",
+        "options": [
+          "Membangun semenisasi di seluruh area lapangan",
+          "Membuat lubang resapan biopori di titik genangan",
+          "Menanam pohon besar di tengah lapangan upacara",
+          "Menutup seluruh permukaan tanah dengan pasir"
+        ],
+        "answer": 1,
+        "subject": "PKLH",
+        "sourceNumber": 2
+      },
+      {
+        "type": "multiple",
+        "text": "Panitia acara perpisahan kelas 6 ingin menyelenggarakan pesta yang ramah lingkungan. Mereka menyusun rencana agar sampah yang dihasilkan sesedikit mungkin. Balikpapan sudah memiliki peraturan daerah yang melarang penggunaan kantong plastik belanja. Panitia ingin menerapkan semangat yang sama dalam acara mereka agar tidak mencemari lingkungan sekolah yang sudah bersih.\n\nBerdasarkan rencana tersebut, tindakan yang benar untuk mengurangi sampah plastik saat acara berlangsung adalah .... (Pilihlah dua jawaban yang benar)",
+        "options": [
+          "Mengganti air minum kemasan gelas dengan galon dan gelas kaca",
+          "Membungkus semua hadiah pemenang lomba dengan kertas kado bermotif plastik",
+          "Menggunakan piring dari pelepah pinang sebagai pengganti piring plastik sekali pakai",
+          "Menyediakan banyak kantong plastik hitam besar di setiap sudut ruangan"
+        ],
+        "answer": [
+          0,
+          2
+        ],
+        "subject": "PKLH",
+        "sourceNumber": 26
+      },
+      {
+        "type": "single",
+        "text": "Budi sedang berdiri di depan cermin besar di kamarnya. Ia memperhatikan bahwa ketika ia mengangkat tangan kanannya, bayangannya di cermin seolah-olah mengangkat tangan kiri. Budi juga mencoba mendekat ke cermin dan melihat bayangannya ikut mendekat dengan ukuran yang tetap sama dengan dirinya. Fenomena ini membuat Budi menyadari sifat-sifat khusus yang dimiliki oleh cermin datar dalam memantulkan cahaya.\n\nBerdasarkan pengamatan Budi, salah satu sifat bayangan yang dihasilkan oleh cermin datar adalah ....",
+        "options": [
+          "ukuran bayangan menjadi lebih kecil dari benda aslinya",
+          "posisi bayangan terbalik secara tegak (kepala di bawah)",
+          "jarak benda ke cermin sama dengan jarak bayangan ke cermin",
+          "bayangan yang dihasilkan bersifat nyata dan dapat ditangkap layar"
+        ],
+        "answer": 2,
+        "subject": "IPAS",
+        "sourceNumber": 3
+      },
+      {
+        "type": "single",
+        "text": "Keluarga Pak Andi mendapati tagihan listrik bulan ini meningkat tajam. Setelah diperiksa, ternyata anak-anak sering lupa mematikan lampu kamar saat siang hari, televisi tetap menyala meskipun tidak ditonton, dan pengisian daya ponsel dibiarkan terpasang di stopkontak semalaman. Pak Andi ingin melakukan langkah mitigasi untuk mengurangi pemborosan energi dan menurunkan tagihan listrik bulan depan.\n\nLangkah yang paling efektif untuk diterapkan oleh keluarga Pak Andi guna menghemat energi listrik adalah ....",
+        "options": [
+          "mengganti semua lampu rumah dengan lampu yang berdaya watt lebih tinggi",
+          "membiarkan semua peralatan elektronik dalam posisi standby setiap saat",
+          "mencabut stopkontak alat elektronik jika sudah tidak digunakan lagi",
+          "menyalakan lampu di seluruh ruangan sepanjang malam untuk keamanan"
+        ],
+        "answer": 2,
+        "subject": "IPAS",
+        "sourceNumber": 7
+      },
+      {
+        "type": "multiple",
+        "text": "Pemanasan global menyebabkan suhu rata-rata bumi meningkat, yang berakibat pada mencairnya es di kutub dan kenaikan permukaan air laut. Hal ini juga mempengaruhi siklus hidup banyak makhluk hidup. Terumbu karang mengalami pemutihan (bleaching) karena suhu air laut yang terlalu panas, sementara banyak pulau kecil berisiko tenggelam. Selain itu, pola migrasi burung menjadi tidak teratur karena perubahan musim yang tidak menentu.\n\nBerdasarkan stimulus tersebut, pernyataan-pernyataan berikut yang benar mengenai dampak pemanasan global terhadap ekosistem adalah ....",
+        "options": [
+          "kenaikan suhu air laut membantu pertumbuhan terumbu karang agar lebih berwarna",
+          "mencairnya es di kutub dapat menyebabkan hilangnya habitat alami hewan seperti beruang kutub",
+          "perubahan musim yang tidak menentu memudahkan petani dalam menentukan masa tanam",
+          "peningkatan permukaan air laut dapat mengancam keberadaan ekosistem pesisir dan pulau kecil"
+        ],
+        "answer": [
+          1,
+          3
+        ],
+        "subject": "IPAS",
+        "sourceNumber": 26
+      },
+      {
+        "type": "single",
+        "text": "Sensus penduduk dilakukan untuk mengetahui jumlah warga di suatu daerah. Di sebuah kabupaten, tercatat jumlah penduduk laki-laki sebanyak 472.905 jiwa. Data ini digunakan pemerintah daerah untuk merencanakan pembangunan fasilitas kesehatan dan pendidikan. Angka-angka tersebut menunjukkan besarnya populasi yang harus dilayani oleh negara. Pemahaman mengenai nilai tempat sangat penting agar tidak terjadi kesalahan dalam membaca data kependudukan yang besar ini.\n\nBerdasarkan data jumlah penduduk tersebut, nilai tempat dari angka 7 adalah ....",
+        "options": [
+          "Puluh ribuan",
+          "Ratus ribuan",
+          "Ribuan",
+          "Ratusan"
+        ],
+        "answer": 0,
+        "subject": "Matematika",
+        "sourceNumber": 1
+      },
+      {
+        "type": "single",
+        "text": "Ibu pergi ke pasar tradisional untuk membeli kebutuhan persiapan hari raya. Ibu membawa uang sebesar Rp500.000,00 di dalam dompetnya. Di pasar, Ibu membeli daging sapi seharga Rp165.000,00, bumbu dapur seharga Rp42.500,00, dan beras kualitas super seharga Rp120.000,00. Ibu harus teliti dalam menghitung sisa uangnya agar cukup untuk ongkos pulang menggunakan transportasi umum sebesar Rp15.000,00.\n\nSisa uang Ibu setelah membayar semua belanjaan dan ongkos pulang adalah ....",
+        "options": [
+          "Rp157.500,00",
+          "Rp172.500,00",
+          "Rp187.500,00",
+          "Rp142.500,00"
+        ],
+        "answer": 0,
+        "subject": "Matematika",
+        "sourceNumber": 2
+      },
+      {
+        "type": "multiple",
+        "text": "Dalam pemilihan ketua kelas, terdapat tiga calon: Ali, Siti, dan Budi. Berdasarkan survei singkat, 20 siswa memilih Ali, 15 siswa memilih Siti, dan 5 siswa memilih Budi. Nama-nama pemilih dari masing-masing calon dimasukkan ke dalam sebuah kotak untuk diundi mendapatkan hadiah hiburan. Setiap kertas memiliki ukuran dan bentuk yang sama sehingga proses pengambilan dilakukan secara acak tanpa melihat ke dalam kotak.\n\nBerdasarkan data tersebut, pernyataan yang benar mengenai peluang terambilnya nama pemilih adalah ....",
+        "options": [
+          "Peluang terambilnya nama pemilih Ali lebih besar daripada pemilih Siti",
+          "Peluang terambilnya nama pemilih Budi adalah yang paling kecil",
+          "Peluang terambilnya nama pemilih Siti lebih kecil daripada pemilih Budi",
+          "Peluang terambilnya nama pemilih Ali dan Budi adalah sama"
+        ],
+        "answer": [
+          0,
+          1
+        ],
+        "subject": "Matematika",
+        "sourceNumber": 26
+      },
+      {
+        "type": "single",
+        "text": "Andi sedang mengerjakan ujian sekolah. Di tengah ujian, ia melihat teman sebangkunya membuka catatan. Meskipun Andi merasa kesulitan menjawab beberapa soal, ia tetap fokus pada lembar jawabannya sendiri. Andi meyakini bahwa Tuhan Yang Maha Esa selalu mengawasi setiap perbuatannya, sehingga ia memilih untuk jujur demi ketenangan hatinya.\n\nSikap Andi yang memilih untuk tetap jujur karena merasa diawasi oleh Tuhan merupakan pengamalan sila Pancasila yang dilambangkan oleh ....",
+        "options": [
+          "Bintang",
+          "Rantai emas",
+          "Pohon beringin",
+          "Kepala banteng"
+        ],
+        "answer": 0,
+        "subject": "Pendidikan Pancasila",
+        "sourceNumber": 1
+      },
+      {
+        "type": "single",
+        "text": "Siswa kelas 5 SD Nusantara mengumpulkan bantuan untuk korban bencana banjir di desa tetangga. Mereka membagi tugas secara adil: ada yang mengumpulkan pakaian layak pakai, ada yang mengemas makanan, dan ada yang menyusun obat-obatan. Mereka melakukan ini tanpa membeda-bedakan suku atau latar belakang para korban.\n\nKegiatan kemanusiaan yang dilakukan oleh siswa kelas 5 tersebut mencerminkan penerapan sila kedua Pancasila yang bermakna ....",
+        "options": [
+          "Mementingkan kepentingan kelompok di atas segalanya",
+          "Mengakui persamaan derajat dan menjunjung nilai kemanusiaan",
+          "Menyelesaikan masalah melalui musyawarah mufakat",
+          "Menghargai keberagaman budaya bangsa"
+        ],
+        "answer": 1,
+        "subject": "Pendidikan Pancasila",
+        "sourceNumber": 2
+      },
+      {
+        "type": "multiple",
+        "text": "Masyarakat Desa Suka Maju sepakat untuk membangun jembatan secara swadaya. Pak Kades memimpin musyawarah untuk menentukan rancangan dan pembagian tugas. Warga yang mampu secara ekonomi menyumbang material, sedangkan warga lainnya menyumbang tenaga. Ibu-ibu di desa juga tidak tinggal diam dengan menyediakan konsumsi bagi warga yang bekerja. Jembatan tersebut akhirnya selesai dan mempermudah akses anak-anak pergi ke sekolah tanpa harus menyeberangi sungai yang dalam.\n\nPernyataan-pernyataan berikut yang menggambarkan keterkaitan nilai Pancasila dalam kegiatan di Desa Suka Maju adalah ....",
+        "options": [
+          "Musyawarah yang dipimpin Pak Kades merupakan pengamalan sila keempat",
+          "Sikap saling membantu antarwarga tanpa memandang status ekonomi mencerminkan sila kelima",
+          "Pembangunan jembatan hanya bertujuan untuk pamer kekuatan desa kepada desa lain",
+          "Partisipasi ibu-ibu dalam menyediakan konsumsi menunjukkan nilai kemanusiaan pada sila kedua"
+        ],
+        "answer": [
+          0,
+          1,
+          3
+        ],
+        "subject": "Pendidikan Pancasila",
+        "sourceNumber": 26
+      },
+      {
+        "type": "single",
+        "text": "Di sebuah taman yang asri, seekor semut bernama Andi menemukan remahan roti yang cukup besar. Alih-alih memakannya sendiri, Andi berlari kembali ke sarang untuk memanggil teman-temannya. Ia tahu bahwa membawa roti sebesar itu sendirian akan memakan waktu lama dan melelahkan. Dengan bekerja sama, mereka berhasil membawa roti tersebut ke sarang sebelum hujan turun. Teman-teman Andi sangat berterima kasih atas kejujuran dan sifat berbagi yang dimiliki Andi.\n\nBerdasarkan teks tersebut, watak yang paling menonjol pada tokoh Andi adalah ....",
+        "options": [
+          "Pemberani dan tangguh",
+          "Peduli dan suka bekerja sama",
+          "Mandiri dan keras kepala",
+          "Cerdik dan sangat lincah"
+        ],
+        "answer": 1,
+        "subject": "Bahasa Indonesia",
+        "sourceNumber": 1
+      },
+      {
+        "type": "single",
+        "text": "Setelah melakukan pengamatan selama dua minggu, terlihat bahwa tanaman yang diletakkan di tempat terang tumbuh lebih subur. Batangnya kokoh dan daunnya berwarna hijau tua. Sebaliknya, tanaman di tempat gelap tampak layu dan pucat. Hal ini membuktikan bahwa cahaya matahari sangat .... bagi proses pertumbuhan tanaman.\n\nKata yang tepat untuk melengkapi kalimat rumpang di atas adalah ....",
+        "options": [
+          "berpengaruh",
+          "memengaruhi",
+          "pengaruhnya",
+          "terpengaruh"
+        ],
+        "answer": 0,
+        "subject": "Bahasa Indonesia",
+        "sourceNumber": 5
+      },
+      {
+        "type": "multiple",
+        "text": "Energi matahari dan angin adalah contoh energi terbarukan yang tidak akan habis digunakan. Penggunaan energi ini jauh lebih ramah lingkungan karena tidak menghasilkan polusi udara. Meskipun biaya pemasangan awalnya cukup mahal, namun dalam jangka panjang energi ini sangat menguntungkan bagi penghematan biaya listrik.\n\nBerdasarkan teks tersebut, pilihlah pernyataan-pernyataan yang benar di bawah ini ....",
+        "options": [
+          "Energi matahari dapat habis jika digunakan secara terus-menerus",
+          "Energi terbarukan membantu mengurangi tingkat polusi udara",
+          "Biaya awal pemasangan alat energi terbarukan tergolong murah",
+          "Dalam jangka panjang, energi terbarukan lebih hemat biaya"
+        ],
+        "answer": [
+          1,
+          3
+        ],
+        "subject": "Bahasa Indonesia",
+        "sourceNumber": 26
+      }
+    ]
+  }
+};
+
+        // --- STATE VARIABLES ---
+        let currentScreen = 'login';
+        let userData = { name: '', school: '', packageKey: 'simulasi_15' };
+        let activeQuestions = []; // Menyimpan urutan soal yang diacak khusus untuk peserta ini
+        let answers = {};
+        let currentQIndex = 0;
+        let timeLeft = 0;
+        let timerInterval;
+        let lastResult = null;
+        let violationCount = 0;
+        let violationLogs = [];
+        let lastViolationTimestamp = 0;
+        const STORAGE_KEY = 'gebyar_dikdas_simulasi_15_2026_hosting_v1';
+        let sessionId = '';
+        let pendingResult = null;
+        let saveStatus = 'idle';
+        let sendingResult = false;
+
+        function newSessionId() {
+            return window.crypto && crypto.randomUUID ? crypto.randomUUID()
+                : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+        }
+        // Alamat Apps Script panitia. HTML ini dapat di-host di layanan lain.
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyYJl1EkSz5ZPc-UIaK4zeOPdiF6iix7EYepIwnDMmgaqtGSwZLEJ-r1pDvVJsc2Bk_/exec';
+        async function sendToSpreadsheet(data) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(),45000);
+            try {
+                // URLSearchParams memakai form-urlencoded, tanpa header khusus/preflight.
+                const response = await fetch(SCRIPT_URL, {
+                    method:'POST',
+                    body:new URLSearchParams({payload:JSON.stringify(data)}),
+                    redirect:'follow',
+                    credentials:'omit',
+                    signal:controller.signal
+                });
+                if (!response.ok) throw new Error('Server merespons ' + response.status + '. Hubungi panitia.');
+                let result;
+                try { result = await response.json(); }
+                catch (_) { throw new Error('Respons server belum sesuai. Pastikan tambahan doPost sudah dipasang dan deployment diperbarui.'); }
+                if (!result || result.ok !== true || result.id !== data.id) {
+                    throw new Error(result && result.error || 'Penyimpanan belum dikonfirmasi oleh server.');
+                }
+                return result;
+            } catch(error) {
+                if (error.name === 'AbortError') throw new Error('Konfirmasi belum diterima. Tekan Kirim Ulang; hasil yang sama tidak dicatat dua kali.');
+                if (error instanceof TypeError) throw new Error('Koneksi ke Spreadsheet belum berhasil. Periksa internet dan akses Web App, lalu kirim ulang.');
+                throw error;
+            } finally { clearTimeout(timeout); }
+        }
+        function updateSaveUI(message) {
+            const el = document.getElementById('save-status');
+            el.textContent = message || (saveStatus === 'saved' ? 'Hasil berhasil tersimpan di Spreadsheet panitia.'
+                : saveStatus === 'saving' ? 'Sedang mengirim hasil ke Spreadsheet...'
+                : 'Hasil belum tersimpan. Tekan Kirim Ulang dan tunggu konfirmasi.');
+            el.className = 'mb-3 text-sm font-semibold ' + (saveStatus === 'saved' ? 'text-green-700' : 'text-orange-700');
+            document.getElementById('retry-save').classList.toggle('hidden',saveStatus === 'saved');
+            document.getElementById('retry-save').disabled = sendingResult;
+        }
+        async function retrySaveResult() {
+            if (!pendingResult || sendingResult) return;
+            sendingResult = true;
+            saveStatus = 'saving';
+            updateSaveUI();
+            saveAppState();
+            try {
+                await sendToSpreadsheet(pendingResult);
+                saveStatus = 'saved';
+                pendingResult = null;
+            } catch(error) {
+                saveStatus = 'failed';
+                updateSaveUI('Belum tersimpan: ' + error.message);
+            } finally {
+                sendingResult = false;
+                saveAppState();
+                if (saveStatus === 'saved') updateSaveUI();
+                document.getElementById('retry-save').disabled = false;
+            }
+        }
+        const preloadedImages = {};
+
+        function saveAppState() {
+            try {
+                const stateToSave = {
+                    sessionId, pendingResult, saveStatus,
+                    currentScreen,
+                    userData,
+                    activeQuestions,
+                    answers,
+                    currentQIndex,
+                    timeLeft,
+                    lastResult,
+                    violationCount,
+                    violationLogs
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+            } catch (e) {
+                console.warn('Gagal menyimpan progres ke penyimpanan lokal:', e);
+            }
+        }
+
+        function clearAppState() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (e) {
+                console.warn('Gagal menghapus penyimpanan lokal:', e);
+            }
+        }
+
+        function populateDashboardUI() {
+            const pkg = soalPackages[userData.packageKey] || soalPackages.simulasi_15;
+            document.getElementById('dash-name').textContent = userData.name;
+            document.getElementById('dash-school').textContent = userData.school;
+            document.getElementById('dash-package').textContent = pkg.title;
+            document.getElementById('dash-count').textContent = pkg.questions.length + " Butir Soal";
+            document.getElementById('dash-time').textContent = pkg.duration + " Menit";
+        }
+
+        // Fungsi pengacak array (Fisher-Yates Shuffle) dengan tetap merekam ID asli soal agar penilaian tetap akurat
+        function shuffleArray(array) {
+            const arr = array.map((item, originalIndex) => ({ ...item, originalIndex }));
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function updateViolationHeaderUI() {
+            const badge = document.getElementById('violation-badge');
+            const countEl = document.getElementById('header-violation-count');
+            if (!badge || !countEl) return;
+
+            countEl.textContent = violationCount;
+            if (violationCount > 0) {
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+        }
+
+        async function sendViolationToSpreadsheet(reason,timestampStr) {
+            const count = violationCount;
+            const thisSession = sessionId;
+            const status = document.getElementById('violation-save-status');
+            status.textContent = 'Catatan pelanggaran sedang dikirim ke panitia...';
+            try {
+                await sendToSpreadsheet({
+                    jenis:'pelanggaran', id:sessionId + '_pelanggaran_' + count, sesi:sessionId,
+                    waktu:timestampStr, nama:userData.name, sekolah:userData.school,
+                    paket:soalPackages[userData.packageKey].title, pelanggaran:count,
+                    status_pelanggaran:reason, riwayat_pelanggaran:violationLogs.join(' | ')
+                });
+                if (sessionId === thisSession && violationCount === count) status.textContent = 'Pelanggaran telah tersimpan di Spreadsheet panitia.';
+            } catch(error) {
+                if (sessionId === thisSession && violationCount === count) status.textContent = 'Log langsung belum terkirim. Riwayat akan disertakan saat mengirim hasil ujian.';
+            }
+        }
+
+        function recordViolation(reason) {
+            if (currentScreen !== 'test') return;
+
+            const now = Date.now();
+            if (now - lastViolationTimestamp < 1500) return;
+            lastViolationTimestamp = now;
+
+            violationCount++;
+            const timestampStr = new Date().toLocaleString('id-ID');
+            violationLogs.push(`${timestampStr} (${reason})`);
+
+            updateViolationHeaderUI();
+            saveAppState();
+
+            // Tampilkan Pop-up Peringatan Pelanggaran
+            document.getElementById('modal-violation-count').textContent = violationCount;
+            document.getElementById('modal-violation-time').textContent = timestampStr;
+            document.getElementById('modal-violation').classList.remove('hidden');
+            lucide.createIcons();
+
+            // Catat langsung ke Spreadsheet
+            sendViolationToSpreadsheet(reason, timestampStr);
+        }
+
+        window.acknowledgeViolation = function() {
+            document.getElementById('modal-violation').classList.add('hidden');
+        }
+
+        function setupAntiCheatListeners() {
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && currentScreen === 'test') {
+                    recordViolation('Membuka Tab Baru / Meninggalkan Halaman Ujian');
+                }
+            });
+
+            window.addEventListener('blur', () => {
+                if (currentScreen === 'test') {
+                    recordViolation('Berpindah Jendela / Membuka Aplikasi Lain');
+                }
+            });
+        }
+
+        function restoreAppState() {
+            try {
+                const rawState = localStorage.getItem(STORAGE_KEY);
+                if (!rawState) return;
+
+                const saved = JSON.parse(rawState);
+                if (!saved || !saved.userData) return;
+
+                userData = {
+                    name: saved.userData.name || '',
+                    school: saved.userData.school || '',
+                    packageKey: soalPackages[saved.userData.packageKey] ? saved.userData.packageKey : 'simulasi_15'
+                };
+                sessionId = saved.sessionId || newSessionId();
+                pendingResult = saved.pendingResult || null;
+                saveStatus = saved.saveStatus === 'saved' ? 'saved' : 'failed';
+                activeQuestions = saved.activeQuestions || [];
+                answers = saved.answers || {};
+                currentQIndex = typeof saved.currentQIndex === 'number' ? saved.currentQIndex : 0;
+                timeLeft = typeof saved.timeLeft === 'number' ? saved.timeLeft : 0;
+                lastResult = saved.lastResult || null;
+                violationCount = typeof saved.violationCount === 'number' ? saved.violationCount : 0;
+                violationLogs = Array.isArray(saved.violationLogs) ? saved.violationLogs : [];
+
+                document.getElementById('input-name').value = userData.name;
+                document.getElementById('input-school').value = userData.school;
+                document.getElementById('input-package').value = userData.packageKey;
+
+                if (saved.currentScreen === 'dashboard' && userData.name && userData.school) {
+                    populateDashboardUI();
+                    switchScreen('dashboard');
+                } else if ((saved.currentScreen === 'test' || saved.currentScreen === 'submitting') && userData.name && userData.school) {
+                    document.getElementById('test-header-subtitle').textContent = `${userData.name} | ${userData.school}`;
+                    updateViolationHeaderUI();
+                    switchScreen('test');
+                    renderQuestion();
+                    if (timeLeft > 0) {
+                        startTimer();
+                    } else {
+                        submitTest();
+                    }
+                } else if (saved.currentScreen === 'result' && lastResult) {
+                    showResults(lastResult.correct, lastResult.wrong, lastResult.score, lastResult.title);
+                    if (pendingResult) retrySaveResult();
+                }
+            } catch (e) {
+                console.warn('Gagal memulihkan progres ujian:', e);
+            }
+        }
+
+        // --- DOM ELEMENTS ---
+        const screens = {
+            login: document.getElementById('screen-login'),
+            dashboard: document.getElementById('screen-dashboard'),
+            test: document.getElementById('screen-test'),
+            submitting: document.getElementById('screen-submitting'),
+            result: document.getElementById('screen-result')
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            const select = document.getElementById('input-package');
+            for (const [key, pkg] of Object.entries(soalPackages)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = pkg.title;
+                select.appendChild(option);
+            }
+
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+
+            ['input-name', 'input-school', 'input-package'].forEach(id => {
+                document.getElementById(id).addEventListener('input', () => {
+                    userData.name = document.getElementById('input-name').value;
+                    userData.school = document.getElementById('input-school').value;
+                    userData.packageKey = document.getElementById('input-package').value;
+                    saveAppState();
+                });
+            });
+            
+            setupAntiCheatListeners();
+            restoreAppState();
+            lucide.createIcons();
+        });
+
+        // --- CORE FUNCTIONS ---
+        function switchScreen(newScreen) {
+            Object.values(screens).forEach(s => s.classList.add('hidden'));
+            screens[newScreen].classList.remove('hidden');
+            currentScreen = newScreen;
+            saveAppState();
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            userData.name = document.getElementById('input-name').value;
+            userData.school = document.getElementById('input-school').value;
+            userData.packageKey = document.getElementById('input-package').value;
+
+            populateDashboardUI();
+            switchScreen('dashboard');
+        }
+
+        function startTest() {
+            sessionId = newSessionId();
+            pendingResult = null;
+            saveStatus = 'idle';
+            const pkg = soalPackages[userData.packageKey];
+            timeLeft = pkg.duration * 60;
+            answers = {};
+            currentQIndex = 0;
+            lastResult = null;
+            violationCount = 0;
+            violationLogs = [];
+            lastViolationTimestamp = Date.now();
+            
+            activeQuestions = shuffleArray(pkg.questions);
+
+            document.getElementById('test-header-subtitle').textContent = `${userData.name} | ${userData.school}`;
+            updateViolationHeaderUI();
+            
+            switchScreen('test');
+            renderQuestion();
+            startTimer();
+            saveAppState();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                saveAppState();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeLeft = 0;
+                    updateTimerDisplay();
+                    submitTest();
+                } else {
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            const mStr = m.toString().padStart(2, '0');
+            const sStr = s.toString().padStart(2, '0');
+            if (h > 0) {
+                return `${h.toString().padStart(2, '0')}:${mStr}:${sStr}`;
+            }
+            return `${mStr}:${sStr}`;
+        }
+
+        function updateTimerDisplay() {
+            const el = document.getElementById('timer-text');
+            const icon = document.getElementById('timer-icon');
+            el.textContent = formatTime(timeLeft);
+            if (timeLeft < 300) {
+                el.classList.add('text-red-400');
+                el.classList.remove('text-white');
+                icon.classList.add('text-red-400', 'animate-pulse');
+                icon.classList.remove('text-red-200');
+            } else {
+                el.classList.remove('text-red-400');
+                el.classList.add('text-white');
+                icon.classList.remove('text-red-400', 'animate-pulse');
+                icon.classList.add('text-red-200');
+            }
+        }
+
+        function renderQuestion() {
+            if (!activeQuestions || activeQuestions.length === 0) {
+                const pkg = soalPackages[userData.packageKey];
+                activeQuestions = shuffleArray(pkg.questions);
+            }
+
+            const q = activeQuestions[currentQIndex];
+            const isMultiple = q.type === 'multiple';
+
+            document.getElementById('q-number').textContent = `Soal Nomor ${currentQIndex + 1}`;
+            
+            const badge = document.getElementById('q-badge');
+            if(isMultiple) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+
+            document.getElementById('q-text').textContent = q.text;
+
+            const optionsContainer = document.getElementById('q-options');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                let isChecked = false;
+                if(isMultiple) {
+                    isChecked = (answers[currentQIndex] || []).includes(idx);
+                } else {
+                    isChecked = answers[currentQIndex] === idx;
+                }
+
+                const label = document.createElement('label');
+                label.className = `flex items-start p-4 border rounded-xl cursor-pointer transition-all duration-200 ${isChecked ? 'border-red-500 bg-red-50 shadow-sm' : 'border-slate-200 hover:bg-slate-50 hover:border-slate-300'}`;
+                
+                const inputType = isMultiple ? 'checkbox' : 'radio';
+                const roundedClass = isMultiple ? 'rounded' : 'rounded-full';
+                const checkedAttr = isChecked ? 'checked' : '';
+
+                label.innerHTML = `
+                    <div class="flex items-center h-5">
+                        <input type="${inputType}" name="question-${currentQIndex}" class="w-5 h-5 text-red-700 focus:ring-red-500 border-slate-300 ${roundedClass}" ${checkedAttr} onchange="handleAnswerChange(${currentQIndex}, ${idx}, ${isMultiple})">
+                    </div>
+                    <div class="ml-3">
+                        <span class="font-bold text-slate-700 mr-2 uppercase">${String.fromCharCode(65 + idx)}.</span>
+                        <span class="text-slate-700 leading-relaxed">${opt}</span>
+                    </div>
+                `;
+                optionsContainer.appendChild(label);
+            });
+
+            document.getElementById('btn-prev').disabled = currentQIndex === 0;
+            
+            if (currentQIndex === activeQuestions.length - 1) {
+                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('btn-finish').classList.replace('hidden', 'flex');
+            } else {
+                document.getElementById('btn-next').classList.replace('hidden', 'flex');
+                document.getElementById('btn-finish').classList.add('hidden');
+            }
+
+            renderGrid();
+        }
+
+        window.handleAnswerChange = function(qIndex, optionIndex, isMultiple) {
+            if (isMultiple) {
+                let currentArr = answers[qIndex] || [];
+                if (currentArr.includes(optionIndex)) {
+                    currentArr = currentArr.filter(i => i !== optionIndex);
+                } else {
+                    currentArr.push(optionIndex);
+                }
+                answers[qIndex] = currentArr;
+            } else {
+                answers[qIndex] = optionIndex;
+            }
+            saveAppState();
+            renderQuestion();
+        }
+
+        window.prevQuestion = function() {
+            if (currentQIndex > 0) {
+                currentQIndex--;
+                saveAppState();
+                renderQuestion();
+            }
+        }
+
+        window.nextQuestion = function() {
+            if (currentQIndex < activeQuestions.length - 1) {
+                currentQIndex++;
+                saveAppState();
+                renderQuestion();
+            }
+        }
+
+        window.jumpToQuestion = function(idx) {
+            currentQIndex = idx;
+            saveAppState();
+            renderQuestion();
+        }
+
+        function renderGrid() {
+            const gridContainer = document.getElementById('q-grid');
+            gridContainer.innerHTML = '';
+
+            let answeredCount = 0;
+
+            activeQuestions.forEach((q, idx) => {
+                const hasAnswer = Array.isArray(answers[idx]) 
+                  ? answers[idx].length > 0 
+                  : answers[idx] !== undefined;
+
+                if (hasAnswer) answeredCount++;
+
+                let statusClass = "bg-white border-slate-300 text-slate-700 hover:bg-slate-100";
+                if (hasAnswer) statusClass = "bg-red-500 border-red-600 text-white shadow-sm";
+                if (idx === currentQIndex) statusClass = "bg-red-700 border-red-800 text-white shadow-md ring-2 ring-red-300";
+
+                const btn = document.createElement('button');
+                btn.className = `h-10 w-full rounded font-medium border flex items-center justify-center transition-all ${statusClass}`;
+                btn.textContent = idx + 1;
+                btn.onclick = () => jumpToQuestion(idx);
+                gridContainer.appendChild(btn);
+            });
+
+            document.getElementById('stat-answered').textContent = `Sudah Dijawab: ${answeredCount}`;
+            document.getElementById('stat-unanswered').textContent = `Belum Dijawab: ${activeQuestions.length - answeredCount}`;
+            
+            window.unansweredFinalCount = activeQuestions.length - answeredCount;
+        }
+
+        window.showSubmitModal = function() {
+            document.getElementById('modal-unanswered').textContent = window.unansweredFinalCount;
+            document.getElementById('modal-submit').classList.remove('hidden');
+        }
+
+        window.hideSubmitModal = function() {
+            document.getElementById('modal-submit').classList.add('hidden');
+        }
+
+        // --- SUBMISSION LOGIC ---
+        window.submitTest = async function() {
+            if (currentScreen !== 'test') return;
+            clearInterval(timerInterval);
+            hideSubmitModal();
+            document.getElementById('modal-violation').classList.add('hidden');
+            switchScreen('submitting');
+
+            const pkg = soalPackages[userData.packageKey];
+            let correct = 0;
+
+            activeQuestions.forEach((q, idx) => {
+                const userAns = answers[idx];
+                const originalCorrectAns = q.answer;
+
+                if (q.type === 'multiple') {
+                    if (Array.isArray(userAns) && Array.isArray(originalCorrectAns)) {
+                        if (userAns.length === originalCorrectAns.length && userAns.every(v => originalCorrectAns.includes(v))) {
+                            correct++;
+                        }
+                    }
+                } else {
+                    if (userAns === originalCorrectAns) correct++;
+                }
+            });
+
+            const total = activeQuestions.length;
+            const wrong = total - correct;
+            const score = Math.round((correct / total) * 100);
+            pendingResult = {
+                jenis:'hasil', id:sessionId + '_hasil', sesi:sessionId,
+                waktu:new Date().toLocaleString('id-ID',{timeZone:'Asia/Makassar'}),
+                nama:userData.name, sekolah:userData.school, paket:pkg.title,
+                benar:correct, salah:wrong, nilai:score, pelanggaran:violationCount,
+                status_pelanggaran:violationCount ? 'Melanggar ' + violationCount + 'x' : 'Bersih (0x)',
+                riwayat_pelanggaran:violationLogs.join(' | ')
+            };
+            saveStatus = 'saving';
+            showResults(correct,wrong,score,pkg.title);
+            await retrySaveResult();
+        }
+
+        function showResults(correct, wrong, score, title) {
+            lastResult = { correct, wrong, score, title };
+            document.getElementById('res-name').textContent = userData.name;
+            document.getElementById('res-school').textContent = userData.school;
+            document.getElementById('res-package').textContent = title;
+            document.getElementById('res-correct').textContent = correct;
+            document.getElementById('res-wrong').textContent = wrong;
+            document.getElementById('res-score').textContent = score;
+
+            const resViolationEl = document.getElementById('res-violation');
+            if (violationCount > 0) {
+                resViolationEl.textContent = `${violationCount} Kali`;
+                resViolationEl.className = 'py-2 font-bold text-red-600 text-right';
+            } else {
+                resViolationEl.textContent = '0 Kali (Bersih)';
+                resViolationEl.className = 'py-2 font-bold text-green-600 text-right';
+            }
+
+            switchScreen('result');
+            updateSaveUI();
+        }
+
+        window.resetApp = function() {
+            if (pendingResult || sendingResult) {
+                alert('Hasil belum dikonfirmasi tersimpan. Tekan Kirim Ulang sebelum keluar.');
+                return;
+            }
+            sessionId = '';
+            saveStatus = 'idle';
+            clearInterval(timerInterval);
+            userData = { name: '', school: '', packageKey: 'simulasi_15' };
+            activeQuestions = [];
+            answers = {};
+            currentQIndex = 0;
+            timeLeft = 0;
+            lastResult = null;
+            violationCount = 0;
+            violationLogs = [];
+            clearAppState();
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-school').value = '';
+            switchScreen('login');
+        }
+
+    </script>
+</body>
+</html>
